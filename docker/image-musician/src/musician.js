@@ -11,7 +11,7 @@ function Musician(instrument, uuid){
 
         var infos = {
             uuid: this.uuid,
-            sound:protocol[instrument]
+            sound: protocol[instrument]
         };
         var payload = JSON.stringify(infos);
         var message = Buffer.from(payload)
@@ -27,7 +27,7 @@ function Musician(instrument, uuid){
 }
 
 if(process.argv.length < 3){
-    console.log("Need 3 arguments");
+    console.log("Need an instrument");
     process.exit();
 }
 var instrument = process.argv[2];
