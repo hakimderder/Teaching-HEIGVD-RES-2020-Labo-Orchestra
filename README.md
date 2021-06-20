@@ -108,7 +108,7 @@ When you connect to the TCP interface of the **Auditor**, you should receive an 
 |Question | Who is going to **send UDP datagrams** and **when**? |
 | | The musicians will send a datagram every second.             |
 |Question | Who is going to **listen for UDP datagrams** and what should happen when a datagram is received? |
-| | The auditor will listen. He will update its list of musicians. |
+| | The auditor will listen. He will update his list of musicians. |
 |Question | What **payload** should we put in the UDP datagrams? |
 | | The uuid and the sound of the musician. |
 |Question | What **data structures** do we need in the UDP sender and receiver? When will we update these data structures? When will we query these data structures? |
@@ -122,7 +122,7 @@ When you connect to the TCP interface of the **Auditor**, you should receive an 
 |Question | In a JavaScript program, if we have an object, how can we **serialize it in JSON**? |
 |  | With the method `JSON.stringify()`.                          |
 |Question | What is **npm**?  |
-| | It's a package manager for javascript. |
+| | It is a package manager for javascript. |
 |Question | What is the `npm install` command and what is the purpose of the `--save` flag?  |
 | | It installs the dependencies of a package passed as argument, or node_modules by default. The `--save` flag is now included by default, but it used to save the dependencies of the package.json folder. |
 |Question | How can we use the `https://www.npmjs.com/` web site?  |
@@ -176,7 +176,7 @@ When you connect to the TCP interface of the **Auditor**, you should receive an 
 | #  | Topic |
 | ---  | --- |
 |Question | How do we validate that the whole system works, once we have built our Docker image? |
-| | We create an auditor and some musicians and add them to the auditor's `Map`. Then, we kill a musician and check if the auditor has been updated. . |
+| | We create an auditor and some musicians and add them to the auditor's `Map`. Then, we kill a musician and check if the auditor has been updated. |
 
 
 ## Constraints
