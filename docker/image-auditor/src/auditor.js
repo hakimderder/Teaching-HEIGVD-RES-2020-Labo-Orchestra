@@ -1,66 +1,108 @@
-const protocol = require('./protocol');
 
-const net = require('net');
-const server = net.createServer();
+/**
+ * The specification of the app
+ */
+const protocol = require('./auditor-protocol');
 
+/**
+ * The map of musicians alive
+ */
+const musicians = new Map();
+
+/**
+ * The map of instruments with their sound as key and name as value
+ */
+const instruments = new Map(protocol.INSTRUMENTS);
+
+/**
+ * The time can be alive witouth sending sound
+ */
+const INTERVAL_UNTIL_DEATH = 5000;
+
+
+//#region UDP
+
+/*
+ * We use a standard Node.js module to work with UDP
+ */
 const dgram = require('dgram');
-const socket = dgram.createSocket('udp4');
 
-const moment = require('moment');
-
-const sounds = [
-    ["ti-ta-ti", "piano"],
-    ["pouet", "trumpet"],
-    ["trulu", "flute"],
-    ["gzi-gzi", "violin"],
-    ["boum-boum", "drum"]
-];
-
-var musicians = new Map();
-const instruments = new Map(sounds);
-
-socket.bind(protocol.PROTOCOL_PORT, function (){
+/* 
+ * Let's create a datagram socket. We will use it to listen for datagrams published in the
+ * multicast group by thermometers and containing measures
+ */
+const udpSocket = dgram.createSocket('udp4');
+udpSocket.bind(protocol.PROTOCOL_PORT, function () {
     console.log("Joining multicast group");
-    socket.addMembership(protocol.PROTOCOL_MULTICAST_ADDRESS);
+    udpSocket.addMembership(protocol.PROTOCOL_MULTICAST_ADDRESS);
 });
 
 
-function addSound(msg, source){
-    console.log("Message " + msg + " from " + source);
+/**
+ * Update the map of musicians with sound received
+ * @param {*} msg The sound of the instrument, and the uuid of the musician
+ * @param {*} source /
+ */
+function receiveSound(msg, source) {
+    console.log("Data has arrived: " + msg + ". Source port: " + source.port);
 
-    let jsonData = JSON.parse(msg);
+    let tmp = JSON.parse(msg);
 
     let musician = {
-        instrument: instruments.get(jsonData.sound),
-        firstActive: instruments.has(jsonData.uuid) ? instruments.get(jsonData.uuid).firstActive : moment(),
-        lastActive: moment()
+        instrument: instruments.get(tmp.sound),
+        activeSince: instruments.has(tmp.uuid) ? instruments.get(tmp.uuid).activeSince : moment(),
+        lastActivity: moment()
     }
-    musicians.set(jsonData.uuid, musician)
+
+    musicians.set(tmp.uuid, musician);
+
 }
 
-socket.on('message', addSound);
+/* 
+ * This call back is invoked when a new datagram has arrived.
+ */
+udpSocket.on('message', receiveSound);
 
-server.listen(protocol.TCP_PORT, function (){
-    console.log("Listening on port " + protocol.TCP_PORT);
-});
+//#endregion
 
-function getActiveMusicians(){
-    var list = [];
-    musicians.forEach(function (value, key){
-        if(moment() - value.lastActive  < 5000){
-            list.push({uuid: key, instrument: value.instrument, firstActive: value.firstActive.utcOffset(+120).format()})
-        } else {
+//#region TCP
+
+/**
+ * Let's create a TCP socket
+ */
+const net = require('net');
+const moment = require('moment');
+
+const tcpServer = net.createServer();
+
+tcpServer.listen(protocol.TCP_PORT);
+
+/**
+ * Send a JSON payload of all musicians alive
+ * @param {*} socket
+ */
+function tcpConnect(socket) {
+    let time = moment();
+
+    let msg = JSON.stringify([...musicians].filter(([key, value]) => {
+        // Remove inactive musician
+        if (time.diff(value.lastActivity) > INTERVAL_UNTIL_DEATH) {
+            console.log("Remove inactive musician: ", key);
             musicians.delete(key);
+            return false;
         }
-    });
-    return list;
+
+        return true;
+        // Map appropriate values for the exportation
+    }).map(([key, value]) => {
+        return { uuid: key, instrument: value.instrument, activeSince: value.lastActivity.format() };
+    }));
+
+    socket.write(msg);
+    socket.write("\n");
+    socket.end();
 }
 
-function connect(tcpSocket){
-    console.log("New TCP connection");
-    let activeMusicians = getActiveMusicians();
-    tcpSocket.write(JSON.stringify(activeMusicians));
-    tcpSocket.end();
-}
+tcpServer.on("connection", tcpConnect);
 
-server.on('connection', connect);
+//#endregion
