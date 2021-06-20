@@ -2,34 +2,32 @@
 const {v4: uuidv4} = require('uuid');
 var dgram = require('dgram');
 var socket = dgram.createSocket('udp4');
-
+const uuid = uuidv4();
 const protocol = require('./protocol');
-
-function Musician(instrument, uuid) {
-    this.instrument = instrument;
-    this.uuid = uuid;
-
-    var infos = {
-        uuid: this.uuid,
+const SOUNDS = new Map();
+SOUNDS.set("piano", "ti-ta-ti");
+SOUNDS.set("trumpet", "pouet");
+SOUNDS.set("flute", "trulu");
+SOUNDS.set("violin", "gzi-gzi");
+SOUNDS.set("drum", "boum-boum");
+function sendMusician() {
+    let musician = {
+        uuid: uuid,
         sound: protocol[instrument]
     };
-    var payload = JSON.stringify(infos);
-    var message = Buffer.from(payload);
-
-    Musician.prototype.update = function () {
-        socket.send(message, 0, message.length, protocol.PROTOCOL_PORT, protocol.PROTOCOL_MULTICAST_ADDRESS,
-            function (error, bytes) {
-                console.log("Sending payload: " + payload + " via port " + socket.address().port);
-            });
-    }
-
-    setInterval(this.update.bind(this), 1000);
+    const msg = JSON.stringify(musician);
+    socket.send(msg, 0, msg.length, protocol.PROTOCOL_PORT, protocol.PROTOCOL_MULTICAST_ADDRESS,
+        function (error, bytes) {
+            console.log("Sending payload: " + msg + " via port " + socket.address().port);
+    });
 }
 
 if (process.argv.length < 3) {
     console.log("Need an instrument");
     process.exit();
 }
-var instrument = process.argv[2];
+const instrument = process.argv[2];
 
-var musician = Musician(instrument, uuidv4);
+setInterval(sendMusician, 1000);
+
+

@@ -2,7 +2,7 @@
   "name": "image-musician",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "musician.js",
   "dependencies": {
     "uuid": "^8.3.2"
   },
