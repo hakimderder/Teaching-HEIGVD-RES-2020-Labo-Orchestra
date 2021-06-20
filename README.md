@@ -160,15 +160,15 @@ When you connect to the TCP interface of the **Auditor**, you should receive an 
 | #  | Topic |
 | ---  | ---  |
 |Question | With Node.js, how can we listen for UDP datagrams in a multicast group? |
-| | *Enter your response here...*  |
+|  | With a UDP socket binded to a port.                          |
 |Question | How can we use the `Map` built-in object introduced in ECMAScript 6 to implement a **dictionary**?  |
-| | *Enter your response here...* |
+| | A `Map`is a pair of elements, so we have the key and the value linked to it. |
 |Question | How can we use the `Moment.js` npm module to help us with **date manipulations** and formatting?  |
-| | *Enter your response here...* |
+| | It is used to get the current date with `moment()`, and has methods such as `substract` or `add` to manipulate time. |
 |Question | When and how do we **get rid of inactive players**?  |
-| | *Enter your response here...* |
+|  | We keep track of the time when the player has last sent a message, and if it has been more than 5 seconds, we delete it from the `Map`. |
 |Question | How do I implement a **simple TCP server** in Node.js?  |
-| | *Enter your response here...* |
+| | By using the package `net`. We create it with the method `createServer` and is active with `listen`. |
 
 
 ## Task 5: package the "auditor" app in a Docker image
@@ -176,7 +176,7 @@ When you connect to the TCP interface of the **Auditor**, you should receive an 
 | #  | Topic |
 | ---  | --- |
 |Question | How do we validate that the whole system works, once we have built our Docker image? |
-| | *Enter your response here...* |
+| | We create an auditor and some musicians and add them to the auditor's `Map`. Then, we kill a musician and check if the auditor has been updated. . |
 
 
 ## Constraints
